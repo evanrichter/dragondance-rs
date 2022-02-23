@@ -1,0 +1,13 @@
+[package]
+name = "dragondance"
+version = "0.1.0"
+authors = ["Evan Richter <evanjrichter@gmail.com>"]
+description = "Code coverage file format for the dragondance ghidra plugin"
+documentation = "https://docs.rs/dragondance"
+repository = "https://github.com/evanrichter/dragondance-rs/"
+readme = "README.md"
+license = "MIT OR Apache-2.0"
+keywords = ["fuzzing", "ghidra", "testing", "security"]
+edition = "2021"
+
+[dependencies]
