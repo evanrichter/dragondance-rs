@@ -17,6 +17,7 @@
 //! ```
 //! [dragondance]: https://github.com/0ffffffffh/dragondance
 
+use std::collections::HashSet;
 use std::io::{Error, Write};
 
 /// A collection of code coverage entries that can be [exported][`Trace::write`] in a
@@ -24,7 +25,7 @@ use std::io::{Error, Write};
 #[derive(Debug, Clone)]
 pub struct Trace {
     modules: Vec<Module>,
-    entries: Vec<Entry>,
+    entries: HashSet<Entry>,
 }
 
 /// A named executable object
@@ -57,7 +58,7 @@ impl Trace {
     pub fn new(modules: &[Module]) -> Self {
         Self {
             modules: modules.to_vec(),
-            entries: Vec::new(),
+            entries: HashSet::new(),
         }
     }
 
@@ -88,7 +89,7 @@ impl Trace {
             })
             .expect("No module found that contains PC");
 
-        self.entries.push(entry);
+        self.entries.insert(entry);
     }
 
     /// Write the coverage trace in the [Dragondance Pintool Helper format].
@@ -129,7 +130,7 @@ impl Trace {
 
 // A single coverage "event". Likely this will represent a single basic block of assembly that was
 // executed.
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, Hash, PartialEq, Eq)]
 struct Entry {
     offset: u32,
     size: u16,
@@ -167,6 +168,18 @@ mod tests {
         trace.write(&mut out).unwrap();
 
         assert!(!out.is_empty());
+    }
+
+    #[test]
+    fn duplicated_entry() {
+        let modules = [Module::new("abcd.so", 0x1000, 0x2000)];
+        let mut trace = Trace::new(&modules);
+
+        // should only be added once
+        trace.add(0x1234, 1);
+        trace.add(0x1234, 1);
+
+        assert_eq!(trace.entries.len(), 1);
     }
 
     #[test]
